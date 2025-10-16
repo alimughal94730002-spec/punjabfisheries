@@ -140,7 +140,7 @@ This project is licensed under the MIT License. See LICENSE for details.
 👥 Credits
 Punjab Fisheries Department – Project Owner
 
-Lead Developer: Mian Salman (CTO, TeqTronics Systems)
+Company: (TeqTronics Systems)
 
 AI Model: KurmaAI/AQUA-7B
 
