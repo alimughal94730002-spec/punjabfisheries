@@ -27,7 +27,7 @@ It includes:
 - SEO automation for better reach
 - Role-based admin panel for departmental operations
 
-**Repository:** [punjabfisheries.gov.pk](https://github.com/skdevelopers/punjabfisheries.gov.pk)  
+**Repository:** [punjabfisheries.gov.pk](https://github.com/alimughal94730002-spec/punjabfisheries)  
 **Production Target:** https://punjabfisheries.gov.pk
 
 ---
