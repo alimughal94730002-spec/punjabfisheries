@@ -279,12 +279,36 @@ class MediaLibraryService
     public function regenerateConversions(Media $media): bool
     {
         try {
+            // Clear existing conversions
             $media->clearMediaConversions();
-            $media->clearMediaConversionsExcept('thumb');
+            
+            // Regenerate conversions using the model's conversion definitions
+            if ($media->model && method_exists($media->model, 'registerMediaConversions')) {
+                $media->model->registerMediaConversions($media);
+            }
+            
             return true;
         } catch (\Exception $e) {
+            \Log::error('Error regenerating conversions for media ' . $media->id . ': ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Regenerate all conversions for all media
+     */
+    public function regenerateAllConversions(): int
+    {
+        $count = 0;
+        $allMedia = Media::where('model_type', Gallery::class)->get();
+        
+        foreach ($allMedia as $media) {
+            if ($this->regenerateConversions($media)) {
+                $count++;
+            }
+        }
+        
+        return $count;
     }
 
     /**

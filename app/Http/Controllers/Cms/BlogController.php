@@ -102,22 +102,90 @@ class BlogController extends Controller
 
         // Handle featured image upload (file upload)
         if ($request->hasFile('featured_image')) {
-            $post->addMediaFromRequest('featured_image')
-                ->toMediaCollection('featured_image');
+            try {
+                $post->addMediaFromRequest('featured_image')
+                    ->toMediaCollection('featured_image');
+                Log::info('Featured image uploaded successfully', ['post_id' => $post->id]);
+            } catch (\Exception $e) {
+                Log::error('Failed to upload featured image', [
+                    'post_id' => $post->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
         // Handle featured image from gallery
         elseif ($request->filled('gallery_featured_image')) {
-            $this->addMediaFromUrl($post, $request->gallery_featured_image, 'featured_image');
+            Log::info('Adding featured image from gallery', [
+                'post_id' => $post->id,
+                'gallery_featured_image' => $request->gallery_featured_image
+            ]);
+            try {
+                $this->addMediaFromUrl($post, $request->gallery_featured_image, 'featured_image');
+                Log::info('Featured image addition completed', ['post_id' => $post->id]);
+            } catch (\Exception $e) {
+                Log::error('Failed to add featured image from gallery', [
+                    'post_id' => $post->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
         }
 
         // Handle banner image upload (file upload)
         if ($request->hasFile('banner_image')) {
-            $post->addMediaFromRequest('banner_image')
-                ->toMediaCollection('banner_image');
+            try {
+                $post->addMediaFromRequest('banner_image')
+                    ->toMediaCollection('banner_image');
+                Log::info('Banner image uploaded successfully', ['post_id' => $post->id]);
+            } catch (\Exception $e) {
+                Log::error('Failed to upload banner image', [
+                    'post_id' => $post->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
         // Handle banner image from gallery
         elseif ($request->filled('gallery_banner_image')) {
-            $this->addMediaFromUrl($post, $request->gallery_banner_image, 'banner_image');
+            Log::info('Adding banner image from gallery', [
+                'post_id' => $post->id,
+                'gallery_banner_image' => $request->gallery_banner_image
+            ]);
+            try {
+                // Check if same image is being used for featured and banner
+                if ($request->gallery_featured_image === $request->gallery_banner_image) {
+                    Log::info('Same image used for featured and banner, copying from featured collection', [
+                        'post_id' => $post->id
+                    ]);
+                    // Copy from featured_image collection to banner_image collection
+                    $featuredMedia = $post->getFirstMedia('featured_image');
+                    if ($featuredMedia) {
+                        $featuredMedia->copy($post, 'banner_image');
+                        Log::info('Banner image copied from featured image', ['post_id' => $post->id]);
+                    }
+                } else {
+                    $this->addMediaFromUrl($post, $request->gallery_banner_image, 'banner_image');
+                }
+                Log::info('Banner image addition completed', ['post_id' => $post->id]);
+            } catch (\Exception $e) {
+                Log::error('Failed to add banner image from gallery', [
+                    'post_id' => $post->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        }
+
+        // ALWAYS sync legacy columns with media URLs - even if image addition failed
+        Log::info('About to sync image columns', ['post_id' => $post->id]);
+        try {
+            $this->syncImageColumns($post);
+            Log::info('Image columns sync completed', ['post_id' => $post->id]);
+        } catch (\Exception $e) {
+            Log::error('Failed to sync image columns', [
+                'post_id' => $post->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
 
         // Attach tags
@@ -187,6 +255,10 @@ class BlogController extends Controller
         }
         // Handle featured image from gallery
         elseif ($request->filled('gallery_featured_image')) {
+            Log::info('Updating featured image from gallery', [
+                'post_id' => $blog->id,
+                'gallery_featured_image' => $request->gallery_featured_image
+            ]);
             $blog->clearMediaCollection('featured_image');
             $this->addMediaFromUrl($blog, $request->gallery_featured_image, 'featured_image');
         }
@@ -200,6 +272,10 @@ class BlogController extends Controller
         }
         // Handle banner image from gallery
         elseif ($request->filled('gallery_banner_image')) {
+            Log::info('Updating banner image from gallery', [
+                'post_id' => $blog->id,
+                'gallery_banner_image' => $request->gallery_banner_image
+            ]);
             $blog->clearMediaCollection('banner_image');
             $this->addMediaFromUrl($blog, $request->gallery_banner_image, 'banner_image');
         }
@@ -218,6 +294,11 @@ class BlogController extends Controller
 
         // Sync tags
         $blog->tags()->sync($request->tags ?? []);
+
+        // Sync legacy columns with media URLs so values also persist in DB columns
+        Log::info('About to sync image columns (update)', ['post_id' => $blog->id]);
+        $this->syncImageColumns($blog);
+        Log::info('Image columns sync completed (update)', ['post_id' => $blog->id]);
 
         return redirect()->route('cms.blog.index')
                         ->with('success', 'Blog post updated successfully.');
@@ -291,14 +372,110 @@ class BlogController extends Controller
     private function addMediaFromUrl($post, $url, $collection)
     {
         try {
-            $post->addMediaFromUrl($url)
+            // Extract the file path from the URL
+            $filePath = $this->extractFilePathFromUrl($url);
+            
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                // If the file exists in storage, add it directly
+                $post->addMediaFromDisk($filePath, 'public')
+                    ->toMediaCollection($collection);
+                    
+                Log::info('Successfully added media from storage path to blog post', [
+                    'filePath' => $filePath,
+                    'post_id' => $post->id,
+                    'collection' => $collection
+                ]);
+                return;
+            }
+
+            // If not found in storage, try to add from URL
+            $normalizedUrl = $url;
+            if ($url && !preg_match('/^https?:\/\//i', $url)) {
+                // Ensure it starts with a single leading slash for url() helper
+                if (!str_starts_with($url, '/')) {
+                    $url = '/' . ltrim($url, '/');
+                }
+                $normalizedUrl = url($url);
+            }
+
+            $post->addMediaFromUrl($normalizedUrl)
                 ->toMediaCollection($collection);
+                
+            Log::info('Successfully added media from URL to blog post', [
+                'url' => $url,
+                'normalizedUrl' => $normalizedUrl,
+                'post_id' => $post->id,
+                'collection' => $collection
+            ]);
         } catch (\Exception $e) {
             // Log error but don't break the flow
             Log::error('Failed to add media from URL: ' . $e->getMessage(), [
                 'url' => $url,
+                'filePath' => $filePath ?? null,
                 'collection' => $collection,
-                'post_id' => $post->id
+                'post_id' => $post->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Extract file path from URL
+     */
+    private function extractFilePathFromUrl($url)
+    {
+        // Remove domain and get the path
+        $path = parse_url($url, PHP_URL_PATH);
+        
+        // Remove leading slash
+        $path = ltrim($path, '/');
+        
+        // If it starts with 'storage/', remove it
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8); // Remove 'storage/' (8 characters)
+        }
+        
+        return $path;
+    }
+
+    /**
+     * Sync DB columns with first media URLs for backward compatibility with places
+     * that still read `featured_image` and `banner_image` from the table.
+     */
+    private function syncImageColumns(BlogPost $post): void
+    {
+        try {
+            $featured = $post->getFirstMediaUrl('featured_image');
+            $banner = $post->getFirstMediaUrl('banner_image');
+
+            Log::info('Syncing image columns', [
+                'post_id' => $post->id,
+                'featured_url' => $featured,
+                'banner_url' => $banner,
+                'featured_media_count' => $post->getMedia('featured_image')->count(),
+                'banner_media_count' => $post->getMedia('banner_image')->count()
+            ]);
+
+            // getFirstMediaUrl returns empty string when no media exists
+            $post->featured_image = $featured ?: null;
+            $post->banner_image = $banner ?: null;
+            if ($post->isDirty(['featured_image', 'banner_image'])) {
+                $post->save();
+                Log::info('Image columns synced successfully', [
+                    'post_id' => $post->id,
+                    'featured_image' => $post->featured_image,
+                    'banner_image' => $post->banner_image
+                ]);
+            } else {
+                Log::info('No changes to sync for image columns', [
+                    'post_id' => $post->id
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to sync image columns', [
+                'post_id' => $post->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
         }
     }

@@ -18,10 +18,10 @@ class SliderSeeder extends Seeder
 
         // Create sample sliders
         Slider::create([
-            'title' => 'Fresh Fisheries',
-            'subtitle' => 'FISHING MAKES ME CRAZY',
-            'description' => 'Fresh Fisheries delivers premium, sustainable seafood through innovative aqua farming and expert fishery services.',
-            'button_text' => 'Get A Quote',
+            'title' => 'app.slider_title',
+            'subtitle' => 'app.slider_subtitle',
+            'description' => 'app.slider_description',
+            'button_text' => 'app.slider_button',
             'button_url' => '#',
             'image_path' => 'sliders/banner-1.webp',
             'order' => 1,
@@ -32,10 +32,10 @@ class SliderSeeder extends Seeder
         ]);
 
         Slider::create([
-            'title' => 'Aqua Harvest',
-            'subtitle' => 'SUSTAINABLE AQUACULTURE',
-            'description' => 'Leading the way in sustainable aquaculture practices with cutting-edge technology and environmental stewardship.',
-            'button_text' => 'Learn More',
+            'title' => 'app.slider_aqua_title',
+            'subtitle' => 'app.slider_aqua_subtitle',
+            'description' => 'app.slider_aqua_description',
+            'button_text' => 'app.slider_aqua_button',
             'button_url' => '/about',
             'image_path' => 'sliders/banner-2.webp',
             'order' => 2,
@@ -46,10 +46,10 @@ class SliderSeeder extends Seeder
         ]);
 
         Slider::create([
-            'title' => 'Clear Waters',
-            'subtitle' => 'QUALITY ASSURANCE',
-            'description' => 'Maintaining the highest standards in water quality and fish health for superior aquaculture products.',
-            'button_text' => 'Our Services',
+            'title' => 'app.slider_water_title',
+            'subtitle' => 'app.slider_water_subtitle',
+            'description' => 'app.slider_water_description',
+            'button_text' => 'app.slider_water_button',
             'button_url' => '/services',
             'image_path' => 'sliders/banner-3.webp',
             'order' => 3,

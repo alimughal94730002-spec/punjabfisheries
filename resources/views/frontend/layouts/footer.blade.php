@@ -9,20 +9,20 @@
     <div class="bg-primary-75">
       <div class="cont relative">
         <img src="{{ asset('assets/images/footer-fish.png') }}" class="absolute right-[98%] top-16" alt="" />
-        <div class="bg-primary-500 relative z-[2] rounded-3xl p-4 md:p-6 xl:p-14 flex justify-between items-center gap-4 max-md:flex-wrap mb-10 xl:mb-20">
-          <h2 class="text-neutral-0 max-w-lg">Subscribe To Our Newsletter</h2>
+        <div class="bg-primary-500 relative z-[2] rounded-3xl p-4 md:p-6 xl:p-14 flex justify-between items-center gap-4 max-md:flex-wrap mb-10 xl:mb-20" dir="{{ app()->getLocale() === 'ur' ? 'rtl' : 'ltr' }}">
+          <h2 class="text-neutral-0 max-w-lg text-right">{{ __('app.subscribe_newsletter') }}</h2>
           <form class="flex items-center rounded-full bg-neutral-0 p-1 md:p-2">
-            <input type="text" placeholder="Enter Your Email..." class="bg-transparent px-3 w-full" />
+            <input type="text" placeholder="{{ __('app.enter_email') }}" class="bg-transparent px-3 w-full text-right" />
             <button class="btn-primary">
-              Subscribe <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="currentColor" viewBox="0 0 256 256"><path d="M227.32,28.68a16,16,0,0,0-15.66-4.08l-.15,0L19.57,82.84a16,16,0,0,0-2.49,29.8L102,154l41.3,84.87A15.86,15.86,0,0,0,157.74,248q.69,0,1.38-.06a15.88,15.88,0,0,0,14-11.51l58.2-191.94c0-.05,0-.1,0-.15A16,16,0,0,0,227.32,28.68ZM157.83,231.85l-.05.14,0-.07-40.06-82.3,48-48a8,8,0,0,0-11.31-11.31l-48,48L24.08,98.25l-.07,0,.14,0L216,40Z"></path></svg>
+              {{ __('app.subscribe') }} <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="currentColor" viewBox="0 0 256 256"><path d="M227.32,28.68a16,16,0,0,0-15.66-4.08l-.15,0L19.57,82.84a16,16,0,0,0-2.49,29.8L102,154l41.3,84.87A15.86,15.86,0,0,0,157.74,248q.69,0,1.38-.06a15.88,15.88,0,0,0,14-11.51l58.2-191.94c0-.05,0-.1,0-.15A16,16,0,0,0,227.32,28.68ZM157.83,231.85l-.05.14,0-.07-40.06-82.3,48-48a8,8,0,0,0-11.31-11.31l-48,48L24.08,98.25l-.07,0,.14,0L216,40Z"></path></svg>
             </button>
           </form>
         </div>
-        <div class="relative z-[2] grid grid-cols-12 xl:grid-cols-13 gap-4 xl:gap-6 pb-10 md:pb-14 xl:pb-20">
+        <div class="relative z-[2] grid grid-cols-12 xl:grid-cols-13 gap-4 xl:gap-6 pb-10 md:pb-14 xl:pb-20" dir="{{ app()->getLocale() === 'ur' ? 'rtl' : 'ltr' }}">
           <div class="col-span-12 md:col-span-6 lg:col-span-3 xl:col-span-4">
             <img src="{{ asset('assets/images/blue.png') }}" class="mb-6" alt="" />
-            <p class="font-medium mb-6">Aqua Farm & Fishery offers sustainable aquaculture solutions and expert consulting to improve fish farming and water quality.</p>
-            <div class="flex items-center gap-2">
+            <p class="font-medium mb-6 text-right">{{ __('app.aqua_farm_fishery_desc') }}</p>
+            <div class="flex items-center gap-2 justify-end">
               <a href="#" aria-label="social site link" class="social-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-5 xl:size-6" fill="currentColor" viewBox="0 0 256 256">
                   <path d="M232,128a104.16,104.16,0,0,1-91.55,103.26,4,4,0,0,1-4.45-4V152h24a8,8,0,0,0,8-8.53,8.17,8.17,0,0,0-8.25-7.47H136V112a16,16,0,0,1,16-16h16a8,8,0,0,0,8-8.53A8.17,8.17,0,0,0,167.73,80H152a32,32,0,0,0-32,32v24H96a8,8,0,0,0-8,8.53A8.17,8.17,0,0,0,96.27,152H120v75.28a4,4,0,0,1-4.44,4A104.15,104.15,0,0,1,24.07,124.09c2-54,45.74-97.9,99.78-100A104.12,104.12,0,0,1,232,128Z"></path>
@@ -46,28 +46,28 @@
             </div>
           </div>
           <div class="col-span-12 md:col-span-6 lg:col-span-3">
-            <p class="text-neutral-900 text-2xl font-semibold mb-4 xl:mb-6">Our Projects</p>
-            <ul class="space-y-4">
-              <li><a href="#" class="link">Shrimp Farming</a></li>
-              <li><a href="#" class="link">Fish Farming</a></li>
-              <li><a href="#" class="link">Aquaculture</a></li>
-              <li><a href="#" class="link">Market Feasibility - Lahore</a></li>
+            <p class="text-neutral-900 text-2xl font-semibold mb-4 xl:mb-6 text-right">{{ __('app.our_projects') }}</p>
+            <ul class="space-y-4 text-right">
+              <li><a href="#" class="link">{{ __('app.shrimp_farming') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.fish_farming') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.aquaculture') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.market_feasibility_lahore') }}</a></li>
             
             </ul>
           </div>
           <div class="col-span-12 md:col-span-6 lg:col-span-3">
-            <p class="text-neutral-900 text-2xl font-semibold mb-4 xl:mb-6">Useful Links</p>
-            <ul class="space-y-4">
-              <li><a href="3" class="link">About Us</a></li>
-              <li><a href="#" class="link">Case Study</a></li>
-              <li><a href="#" class="link">Contact Us</a></li>
-              <li><a href="#" class="link">Privacy Policy</a></li>
-              <li><a href="#" class="link">Terms & Conditions</a></li>
+            <p class="text-neutral-900 text-2xl font-semibold mb-4 xl:mb-6 text-right">{{ __('app.useful_links') }}</p>
+            <ul class="space-y-4 text-right">
+              <li><a href="{{ route('frontend.about') }}" class="link">{{ __('app.about_us') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.case_study') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.contact') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.privacy_policy') }}</a></li>
+              <li><a href="#" class="link">{{ __('app.terms_conditions') }}</a></li>
             </ul>
           </div>
           <div class="col-span-12 md:col-span-6 lg:col-span-3">
-            <p class="text-neutral-900 text-2xl font-semibold mb-4 xl:mb-6">Contact Info</p>
-            <ul class="space-y-4">
+            <p class="text-neutral-900 text-2xl font-semibold mb-4 xl:mb-6 text-right">{{ __('app.contact_info') }}</p>
+            <ul class="space-y-4 text-right">
               <li class="flex items-start gap-3">
                 <span class="social-icon shrink-0 hover:bg-neutral-0 text-primary-300">
                   <svg xmlns="http://www.w3.org/2000/svg" class="size-5 xl:size-6" fill="currentColor" viewBox="0 0 256 256">
@@ -76,18 +76,18 @@
                     ></path>
                   </svg>
                 </span>
-                <div>
-                  <p class="mb-2 font-semibold text-neutral-900">Phone</p>
-                  <span>04299211584</span>
+                <div class="text-right">
+                  <p class="mb-2 font-semibold text-neutral-900">{{ __('app.phone') }}</p>
+                  <span>{{ __('app.phone_number_04299211584') }}</span>
                 </div>
               </li>
                <li class="flex items-start gap-3">
                 <span class="social-icon shrink-0 hover:bg-neutral-0 text-primary-300">
                   <svg xmlns="http://www.w3.org/2000/svg" class="size-5 xl:size-6" fill="currentColor" viewBox="0 0 256 256"><path d="M228.44,89.34l-96-64a8,8,0,0,0-8.88,0l-96,64A8,8,0,0,0,24,96V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V96A8,8,0,0,0,228.44,89.34ZM96.72,152,40,192V111.53Zm16.37,8h29.82l56.63,40H56.46Zm46.19-8L216,111.53V192ZM128,41.61l81.91,54.61-67,47.78H113.11l-67-47.78Z"></path></svg>
                 </span>
-                <div>
-                  <p class="mb-2 font-semibold text-neutral-900">Email</p>
-                  <span><a href="mailto:fishdept@hotmail.com" class="__cf_email__" data-cfemail="3d595850527d58455c504d5158135e5250">fishdept@hotmail.com</a></span>
+                <div class="text-right">
+                  <p class="mb-2 font-semibold text-neutral-900">{{ __('app.email') }}</p>
+                  <span><a href="mailto:{{ __('app.fishdept_email') }}" class="__cf_email__" data-cfemail="3d595850527d58455c504d5158135e5250">{{ __('app.fishdept_email') }}</a></span>
                 </div>
               </li>
            
@@ -97,17 +97,17 @@
                     <path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"></path>
                   </svg>
                 </span>
-                <div>
-                  <p class="mb-2 font-semibold text-neutral-900">Address</p>
-                  <span>9-A Bahawalpur Road, Chauburji, Lahore</span>
+                <div class="text-right">
+                  <p class="mb-2 font-semibold text-neutral-900">{{ __('app.address') }}</p>
+                  <span>{{ __('app.bahawalpur_road_address') }}</span>
                 </div>
               </li>
             </ul>
           </div>
         </div>
       </div>
-      <div class="py-5 xl:py-7 text-center border-t border-primary-300">
-        <p>Copyright <span class="text-primary-300">&copy;</span> <span id="year"></span> - All rights reserved by <a href="#" class="text-primary-300">Department of Fisheries - Punjab</a></p>
+      <div class="py-5 xl:py-7 text-center border-t border-primary-300" dir="{{ app()->getLocale() === 'ur' ? 'rtl' : 'ltr' }}">
+        <p class="text-right">{{ __('app.copyright') }} <span class="text-primary-300">&copy;</span> <span id="year"></span> - {{ __('app.all_rights_reserved') }} <a href="#" class="text-primary-300">{{ __('app.department_fisheries_punjab') }}</a></p>
       </div>
     </div>
   </div>

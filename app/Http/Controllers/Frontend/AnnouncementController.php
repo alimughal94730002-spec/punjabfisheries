@@ -9,10 +9,40 @@ use Illuminate\Http\Request;
 class AnnouncementController extends Controller
 {
     /**
+     * Set locale for frontend requests
+     */
+    private function setFrontendLocale(Request $request)
+    {
+        $supported = config('localization.supported', ['en', 'ur']);
+        $fallback = config('localization.fallback', 'en');
+
+        $locale = null;
+
+        // Check session first (for frontend language switching)
+        $locale = $request->session()->get('locale');
+        
+        // Then check cookie
+        $locale = $locale ?? $request->cookie('locale');
+        
+        // Then check user preference (only if no session/cookie locale)
+        if (!$locale && $request->user() && in_array($request->user()->preferred_locale, $supported, true)) {
+            $locale = $request->user()->preferred_locale;
+        }
+
+        // Finally check Accept-Language header
+        if (!$locale) {
+            $locale = $request->getPreferredLanguage($supported) ?? $fallback;
+        }
+
+        app()->setLocale($locale);
+    }
+
+    /**
      * Display a listing of announcements.
      */
     public function index(Request $request)
     {
+        $this->setFrontendLocale($request);
         $query = Announcement::active()
             ->published()
             ->notExpired()
@@ -46,8 +76,9 @@ class AnnouncementController extends Controller
     /**
      * Display the specified announcement.
      */
-    public function show(Announcement $announcement)
+    public function show(Request $request, Announcement $announcement)
     {
+        $this->setFrontendLocale($request);
         // Check if announcement is active and published
         if (!$announcement->isActive() || $announcement->published_date > now()) {
             abort(404);

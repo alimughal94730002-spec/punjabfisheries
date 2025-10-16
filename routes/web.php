@@ -11,6 +11,8 @@ use App\Http\Controllers\Frontend\AnnouncementController as FrontendAnnouncement
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\SitemapController;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +27,111 @@ use Illuminate\Support\Facades\Auth;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// Language switch routes
+Route::post('/locale', LocaleController::class)->name('locale.set');
+Route::get('/locale/{locale}', function($locale) {
+    // Simple GET route for testing language switching
+    \Log::info('Locale switching attempt', ['locale' => $locale, 'supported' => config('localization.supported')]);
+    
+    if (in_array($locale, config('localization.supported'))) {
+        session(['locale' => $locale]);
+        cookie()->queue(cookie()->forever('locale', $locale));
+        
+        if (auth()->user()) {
+            auth()->user()->update(['preferred_locale' => $locale]);
+        }
+        
+        \Log::info('Locale set successfully', ['locale' => $locale, 'session' => session('locale')]);
+        
+        return redirect()->back()->with('success', 'Language changed to ' . $locale);
+    }
+    \Log::warning('Invalid locale attempted', ['locale' => $locale]);
+    return redirect()->back()->with('error', 'Invalid language');
+})->name('locale.get');
+
+// Test route to check current locale
+Route::get('/test-locale', function() {
+    return response()->json([
+        'current_locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'cookie_locale' => request()->cookie('locale'),
+        'user_locale' => auth()->user()?->preferred_locale,
+        'supported_locales' => config('localization.supported'),
+        'translation_test' => __('app.home'),
+    ]);
+});
+
+
+// Debug route to manually set locale and test
+Route::get('/debug-locale/{locale}', function($locale) {
+    if (in_array($locale, config('localization.supported'))) {
+        session(['locale' => $locale]);
+        
+        // Test if the frontend controller method works
+        $request = request();
+        $controller = new \App\Http\Controllers\FrontendController();
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('setFrontendLocale');
+        $method->setAccessible(true);
+        $method->invoke($controller, $request);
+        
+        return response()->json([
+            'message' => 'Locale set to ' . $locale,
+            'app_locale_before' => 'en', // default
+            'app_locale_after' => app()->getLocale(),
+            'session_locale' => session('locale'),
+            'translation_home' => __('app.home'),
+            'translation_about' => __('app.about'),
+        ]);
+    }
+    return response()->json(['error' => 'Invalid locale'], 400);
+});
+
+
+
+// Test route to simulate frontend controller locale setting
+Route::get('/test-frontend-locale', function() {
+    $request = request();
+    $request->session()->put('locale', 'ur');
+    
+    $controller = new \App\Http\Controllers\FrontendController();
+    $reflection = new ReflectionClass($controller);
+    $method = $reflection->getMethod('setFrontendLocale');
+    $method->setAccessible(true);
+    $method->invoke($controller, $request);
+    
+    return response()->json([
+        'app_locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'translation_test' => __('app.home'),
+    ]);
+});
+
+// Test route to check if locale switching works
+Route::get('/test-locale-switch/{locale}', function($locale) {
+    if (in_array($locale, config('localization.supported'))) {
+        session(['locale' => $locale]);
+        cookie()->queue(cookie()->forever('locale', $locale));
+        
+        // Test the frontend controller method
+        $request = request();
+        $controller = new \App\Http\Controllers\FrontendController();
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('setFrontendLocale');
+        $method->setAccessible(true);
+        $method->invoke($controller, $request);
+        
+        return response()->json([
+            'message' => 'Language switched to ' . $locale,
+            'app_locale' => app()->getLocale(),
+            'session_locale' => session('locale'),
+            'translation_test' => __('app.home'),
+            'supported_locales' => config('localization.supported'),
+        ]);
+    }
+    return response()->json(['error' => 'Invalid language'], 400);
+});
 
 // Frontend Routes (Public)
 Route::get('/', [FrontendController::class, 'index'])->name('frontend.home');
@@ -43,6 +150,11 @@ Route::get('/tenders', [FrontendController::class, 'tenders'])->name('frontend.t
 Route::get('/tenders/{tender}', [FrontendController::class, 'tenderShow'])->name('frontend.tenders.show');
 Route::get('/tender/{id}/download', [FrontendController::class, 'downloadTenderPdf'])->name('frontend.tender.download');
 Route::get('/tender/{id}/download-2', [FrontendController::class, 'downloadTenderPdf2'])->name('frontend.tender.download2');
+// Shrimp Sites Map (public)
+Route::get('/shrimp-sites-map', [FrontendController::class, 'shrimpSitesMap'])->name('frontend.shrimp.map');
+Route::get('/shrimp-sites.json', [FrontendController::class, 'shrimpSitesJson'])->name('frontend.shrimp.json');
+// Public media proxy for storage files (restricted)
+Route::get('/media/public/{path}', [FrontendController::class, 'mediaPublic'])->where('path', '.*')->name('media.public');
 
 // Announcements Routes
 Route::get('/announcements', [FrontendAnnouncementController::class, 'index'])->name('frontend.announcements');
@@ -284,6 +396,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{media}', [CmsPageController::class, 'destroyMedia'])->name('destroy');
             Route::post('/bulk-delete', [CmsPageController::class, 'bulkDeleteMedia'])->name('bulk-delete');
             Route::post('/gallery', [CmsPageController::class, 'createGallery'])->name('gallery.create');
+            Route::post('/regenerate-conversions', [CmsPageController::class, 'regenerateConversions'])->name('regenerate-conversions');
         });
 
         // Announcements Management Routes
@@ -296,6 +409,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('jobs', JobController::class);
         Route::patch('/jobs/{job}/toggle-status', [JobController::class, 'toggleStatus'])->name('jobs.toggle-status');
         Route::patch('/jobs/{job}/toggle-active', [JobController::class, 'toggleActive'])->name('jobs.toggle-active');
+
+        // Shrimp Sites CMS
+        Route::resource('shrimp-sites', \App\Http\Controllers\Cms\ShrimpSiteController::class)->parameters([
+            'shrimp-sites' => 'shrimp_site'
+        ])->names('shrimp-sites');
+        Route::patch('/shrimp-sites/{shrimp_site}/toggle', [\App\Http\Controllers\Cms\ShrimpSiteController::class, 'toggle'])->name('shrimp-sites.toggle');
 
     });
     
@@ -348,3 +467,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('permissions/{permission}', [RoleController::class, 'destroyPermission'])->name('permissions.destroy');
     });
 });
+
+// Sitemap routes
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
+Route::get('/sitemap-index.xml', [SitemapController::class, 'indexFile'])->name('sitemap.index');
+Route::get('/sitemap/regenerate', [SitemapController::class, 'regenerate'])->name('sitemap.regenerate');
+Route::get('/sitemap/stats', [SitemapController::class, 'stats'])->name('sitemap.stats');

@@ -134,7 +134,7 @@
               <div class="space-y-3">
                 <!-- WordPress-style Featured Image Box -->
                 <div id="featured-image-box" class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-slate-400 transition-colors cursor-pointer" 
-                     onclick="openMediaLibraryModal()" 
+                     onclick="openMediaLibraryModal('featured')" 
                      x-data="{ hasImage: false }" 
                      x-show="!featuredPreview">
                   <svg class="w-12 h-12 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,23 +145,21 @@
                 </div>
                 
                 <!-- Image Preview -->
-                <div x-show="featuredPreview" class="relative group">
+                <div x-show="featuredPreview">
                   <img :src="featuredPreview" alt="Featured Image Preview" class="w-full h-48 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                      <button type="button" onclick="document.getElementById('featured_image').click()" 
-                              class="bg-white text-slate-800 px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-100">
-                        Change Image
-                      </button>
-                      <button type="button" onclick="openMediaLibraryModal()" 
-                              class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
-                        Choose from Gallery
-                      </button>
-                      <button type="button" onclick="removeFeaturedImage()" 
-                              class="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700">
-                        Remove
-                      </button>
-                    </div>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onclick="document.getElementById('featured_image').click()" 
+                            class="bg-white text-slate-800 px-3 py-2 rounded-md text-sm font-medium border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                      Change Image
+                    </button>
+                    <button type="button" onclick="openMediaLibraryModal('featured')" 
+                            class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+                      Choose from Gallery
+                    </button>
+                    <button type="button" onclick="removeFeaturedImage()" 
+                            class="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700">
+                      Remove
+                    </button>
                   </div>
                 </div>
 
@@ -175,7 +173,7 @@
               <div class="space-y-3">
                 <!-- WordPress-style Banner Image Box -->
                 <div id="banner-image-box" class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-slate-400 transition-colors cursor-pointer" 
-                     onclick="openBannerGalleryModal()" 
+                     onclick="openMediaLibraryModal('banner')" 
                      x-show="!bannerPreview">
                   <svg class="w-12 h-12 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -185,19 +183,17 @@
                 </div>
 
                 <!-- Banner Image Preview -->
-                <div x-show="bannerPreview" class="relative group">
+                <div x-show="bannerPreview">
                   <img :src="bannerPreview" alt="Banner Image Preview" class="w-full h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                      <button type="button" onclick="document.getElementById('banner_image').click()" 
-                              class="bg-white text-slate-800 px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-100">
-                        Change Image
-                      </button>
-                      <button type="button" onclick="removeBannerImage()" 
-                              class="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700">
-                        Remove
-                      </button>
-                    </div>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onclick="document.getElementById('banner_image').click()" 
+                            class="bg-white text-slate-800 px-3 py-2 rounded-md text-sm font-medium border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                      Change Image
+                    </button>
+                    <button type="button" onclick="removeBannerImage()" 
+                            class="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700">
+                      Remove
+                    </button>
                   </div>
                 </div>
 
@@ -226,10 +222,10 @@
 
   <!-- Media Library Modal -->
   <div id="mediaLibraryModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-lg max-w-6xl max-h-[90vh] w-full overflow-hidden shadow-2xl">
+    <div class="bg-white dark:bg-slate-800 rounded-lg w-full max-w-6xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col">
       <!-- Modal Header -->
       <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-        <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100">Select Featured Image</h3>
+        <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100"><span id="mediaModalTitle">Select Image</span></h3>
         <button onclick="closeMediaLibraryModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1">
           <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -252,7 +248,7 @@
       </div>
 
       <!-- Tab Content -->
-      <div class="flex-1 overflow-hidden">
+      <div class="flex-1 overflow-y-auto">
         
         <!-- Upload Tab -->
         <div id="mediaUploadTabContent" class="p-6">
@@ -576,12 +572,45 @@
       }
     }
 
+  // Helper: make absolute URL from possibly relative path (global scope)
+  function makeAbsoluteUrl(u) {
+    try {
+      if (!u) return u;
+      // If already absolute
+      if (/^https?:\/\//i.test(u)) return u;
+      // If it's a data URL, return as is
+      if (u.startsWith('data:')) return u;
+      // Ensure leading slash then join with current origin
+      const path = u.startsWith('/') ? u : '/' + u;
+      return new URL(path, window.location.origin).href;
+    } catch (_) {
+      return u;
+    }
+  }
+
+  // Handle image loading errors
+  function handleImageError(img, originalUrl) {
+    console.error('Failed to load image:', originalUrl);
+    img.style.backgroundColor = '#ff0000';
+    img.style.border = '2px solid red';
+    img.style.display = 'block';
+    
+    // Try to show a placeholder or error message
+    img.alt = 'Failed to load image';
+    img.title = 'Failed to load image: ' + originalUrl;
+    
+    // Log the error for debugging
+    console.error('Image load error for URL:', originalUrl);
+  }
+
     // Image removal functions
     function removeFeaturedImage() {
       if (window.wpBuilderInstance) {
         window.wpBuilderInstance.featuredPreview = null;
       }
       document.getElementById('featured_image').value = '';
+      const gfi = document.getElementById('gallery_featured_image');
+      if (gfi) gfi.remove();
     }
 
     function removeBannerImage() {
@@ -589,23 +618,37 @@
         window.wpBuilderInstance.bannerPreview = null;
       }
       document.getElementById('banner_image').value = '';
+      const gbi = document.getElementById('gallery_banner_image');
+      if (gbi) gbi.remove();
     }
 
     // WordPress-style Gallery Modal Functions
     let selectedImage = null;
     let mediaImages = [];
     let currentMediaTab = 'upload';
+    let mediaTarget = 'featured'; // 'featured' or 'banner'
 
-    function openMediaLibraryModal() {
+    function openMediaLibraryModal(target = 'featured') {
+      mediaTarget = target;
+      selectedImage = null;
       document.getElementById('mediaLibraryModal').classList.remove('hidden');
+      // Update modal title and button text based on target
+      const titleEl = document.getElementById('mediaModalTitle');
+      if (titleEl) {
+        titleEl.textContent = mediaTarget === 'banner' ? 'Select Banner Image' : 'Select Featured Image';
+      }
+      const selectBtn = document.getElementById('selectMediaBtn');
+      if (selectBtn) {
+        selectBtn.textContent = mediaTarget === 'banner' ? 'Select Banner Image' : 'Select Featured Image';
+        selectBtn.disabled = true;
+      }
       switchMediaTab('upload'); // Start with upload tab
       loadMediaGalleries(); // Load galleries for upload
     }
 
     function openBannerGalleryModal() {
-      // For now, use the same modal but we can customize it later
-      document.getElementById('mediaLibraryModal').classList.remove('hidden');
-      switchTab('upload'); // Start with upload tab
+      // Backward-compat: route to unified modal with banner target
+      openMediaLibraryModal('banner');
     }
 
     function closeMediaLibraryModal() {
@@ -618,7 +661,7 @@
       // Reset select button
       const selectBtn = document.getElementById('selectMediaBtn');
       selectBtn.disabled = true;
-      selectBtn.textContent = 'Select Image';
+      selectBtn.textContent = mediaTarget === 'banner' ? 'Select Banner Image' : 'Select Featured Image';
     }
 
     function switchMediaTab(tabName) {
@@ -836,11 +879,11 @@
       images.forEach(image => {
         const div = document.createElement('div');
         div.className = 'gallery-image-item relative group cursor-pointer rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 border border-slate-200 dark:border-slate-700';
-        div.onclick = () => selectImageFromGallery(image);
+        div.onclick = (e) => selectImageFromGallery(e.currentTarget, image);
         
         div.innerHTML = `
           <div class="aspect-square relative">
-            <img src="${image.thumb || image.url}" alt="${image.name}" class="w-full h-full object-cover">
+            <img src="${makeAbsoluteUrl(image.thumb || image.url)}" alt="${image.name}" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
               <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <div class="bg-white rounded-full p-2">
@@ -870,7 +913,7 @@
       });
     }
 
-    function selectImageFromGallery(image) {
+    function selectImageFromGallery(element, image) {
       // Remove previous selection
       document.querySelectorAll('.gallery-image-item').forEach(item => {
         item.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2');
@@ -883,10 +926,10 @@
       });
       
       // Add selection to clicked item
-      event.currentTarget.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+      element.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
       
       // Show checkmark for selected item
-      const checkmark = event.currentTarget.querySelector('.absolute.top-2.right-2');
+      const checkmark = element.querySelector('.absolute.top-2.right-2');
       if (checkmark) {
         checkmark.classList.remove('opacity-0');
         checkmark.classList.add('opacity-100');
@@ -908,7 +951,7 @@
 
       // Set the featured image preview
       if (window.wpBuilderInstance) {
-        window.wpBuilderInstance.featuredPreview = selectedGalleryImage.url;
+        window.wpBuilderInstance.featuredPreview = makeAbsoluteUrl(selectedGalleryImage.url);
       }
 
       // Create a hidden input to store the gallery image URL
@@ -920,7 +963,7 @@
         hiddenInput.id = 'gallery_featured_image';
         document.getElementById('blogForm').appendChild(hiddenInput);
       }
-      hiddenInput.value = selectedGalleryImage.url;
+      hiddenInput.value = makeAbsoluteUrl(selectedGalleryImage.url);
 
       // Clear the file input
       document.getElementById('featured_image').value = '';
@@ -928,33 +971,39 @@
       closeMediaLibraryModal();
     }
 
-    // Search functionality
-    document.getElementById('gallerySearch').addEventListener('input', function(e) {
-      const searchTerm = e.target.value.toLowerCase();
-      const filteredImages = galleryImages.filter(image => 
-        image.name.toLowerCase().includes(searchTerm) || 
-        image.gallery_title.toLowerCase().includes(searchTerm)
-      );
-      displayGalleryImages(filteredImages);
-    });
+    // Search functionality (legacy gallery modal) — bind only if element exists
+    const gallerySearchEl = document.getElementById('gallerySearch');
+    if (gallerySearchEl) {
+      gallerySearchEl.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredImages = galleryImages.filter(image => 
+          image.name.toLowerCase().includes(searchTerm) || 
+          (image.gallery_title || '').toLowerCase().includes(searchTerm)
+        );
+        displayGalleryImages(filteredImages);
+      });
+    }
 
-    // File upload event listener
-    document.getElementById('galleryFileUpload').addEventListener('change', function(e) {
-      // If only one file is selected, show preview immediately
-      if (e.target.files.length === 1) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          // Set featured image preview
-          if (window.wpBuilderInstance) {
-            window.wpBuilderInstance.featuredPreview = e.target.result;
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-      
-      handleGalleryUpload(e.target.files);
-    });
+    // File upload event listener (legacy gallery modal) — bind only if element exists
+    const galleryFileUploadEl = document.getElementById('galleryFileUpload');
+    if (galleryFileUploadEl) {
+      galleryFileUploadEl.addEventListener('change', function(e) {
+        // If only one file is selected, show preview immediately
+        if (e.target.files.length === 1) {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            // Set featured image preview
+            if (window.wpBuilderInstance) {
+              window.wpBuilderInstance.featuredPreview = e.target.result;
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+        
+        handleGalleryUpload(e.target.files);
+      });
+    }
 
     // Drag and drop functionality
     const uploadArea = document.querySelector('#uploadTabContent .border-dashed');
@@ -1029,11 +1078,11 @@
       }
 
       images.forEach(image => {
-        const imageUrl = image.thumb || image.url;
+        const imageUrl = makeAbsoluteUrl(image.thumb || image.url);
         
         const div = document.createElement('div');
         div.className = 'media-image-item relative group cursor-pointer rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 border border-slate-200 dark:border-slate-700';
-        div.onclick = () => selectImageFromMedia(image);
+        div.onclick = (e) => selectImageFromMedia(e.currentTarget, image);
         
         div.innerHTML = `
           <div class="aspect-square relative bg-gray-100" style="overflow: hidden;">
@@ -1041,7 +1090,7 @@
                  alt="${image.name}" 
                  class="w-full h-full object-cover rounded-lg" 
                  style="min-height: 200px; background-color: #f3f4f6; display: block !important; opacity: 1 !important; visibility: visible !important; position: relative; z-index: 1;"
-                 onerror="this.style.backgroundColor='#ff0000'; this.style.border='2px solid red'; this.style.display='block';"
+                 onerror="handleImageError(this, '${imageUrl}')"
                  onload="this.style.backgroundColor='transparent'; this.style.display='block';">
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center rounded-lg">
               <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -1072,7 +1121,7 @@
       });
     }
 
-    function selectImageFromMedia(image) {
+    function selectImageFromMedia(element, image) {
       // Remove previous selection
       document.querySelectorAll('.media-image-item').forEach(item => {
         item.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2');
@@ -1085,10 +1134,10 @@
       });
       
       // Add selection to clicked item
-      event.currentTarget.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+      element.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
       
       // Show checkmark for selected item
-      const checkmark = event.currentTarget.querySelector('.absolute.top-2.right-2');
+      const checkmark = element.querySelector('.absolute.top-2.right-2');
       if (checkmark) {
         checkmark.classList.remove('opacity-0');
         checkmark.classList.add('opacity-100');
@@ -1096,30 +1145,50 @@
       
       selectedImage = image;
       
-      // Enable select button
+      // Enable select button and reflect target
       const selectBtn = document.getElementById('selectMediaBtn');
       selectBtn.disabled = false;
+      selectBtn.textContent = mediaTarget === 'banner' ? 'Select Banner Image' : 'Select Featured Image';
     }
 
     function selectMediaImage() {
       if (!selectedImage) return;
       
-      // Set the featured image preview
-      window.wpBuilderInstance.featuredPreview = selectedImage.url;
-      
-      // Create hidden input for the image URL
-      let hiddenInput = document.getElementById('gallery_featured_image');
-      if (!hiddenInput) {
-        hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'gallery_featured_image';
-        hiddenInput.id = 'gallery_featured_image';
-        document.getElementById('blogForm').appendChild(hiddenInput);
+      if (mediaTarget === 'banner') {
+        // Set banner image preview
+        if (window.wpBuilderInstance) {
+          window.wpBuilderInstance.bannerPreview = makeAbsoluteUrl(selectedImage.url);
+        }
+        // Hidden input for banner
+        let hiddenInput = document.getElementById('gallery_banner_image');
+        if (!hiddenInput) {
+          hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'gallery_banner_image';
+          hiddenInput.id = 'gallery_banner_image';
+          document.getElementById('blogForm').appendChild(hiddenInput);
+        }
+        hiddenInput.value = makeAbsoluteUrl(selectedImage.url);
+        // Clear related file input
+        const b = document.getElementById('banner_image');
+        if (b) b.value = '';
+      } else {
+        // Default: featured
+        if (window.wpBuilderInstance) {
+          window.wpBuilderInstance.featuredPreview = makeAbsoluteUrl(selectedImage.url);
+        }
+        let hiddenInput = document.getElementById('gallery_featured_image');
+        if (!hiddenInput) {
+          hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'gallery_featured_image';
+          hiddenInput.id = 'gallery_featured_image';
+          document.getElementById('blogForm').appendChild(hiddenInput);
+        }
+        hiddenInput.value = makeAbsoluteUrl(selectedImage.url);
+        const f = document.getElementById('featured_image');
+        if (f) f.value = '';
       }
-      hiddenInput.value = selectedImage.url;
-
-      // Clear the file input
-      document.getElementById('featured_image').value = '';
 
       closeMediaLibraryModal();
     }

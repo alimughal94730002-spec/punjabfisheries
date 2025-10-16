@@ -11,15 +11,56 @@ use App\Models\BlogTag;
 use App\Models\BlogComment;
 use App\Models\Tender;
 use App\Models\Announcement;
+use App\Models\ShrimpSite;
 use Illuminate\Support\Facades\Storage;
 
 class FrontendController extends Controller
 {
     /**
+     * Set locale for frontend requests
+     */
+    private function setFrontendLocale(Request $request)
+    {
+        $supported = config('localization.supported', ['en', 'ur']);
+        $fallback = config('localization.fallback', 'en');
+
+        $locale = null;
+
+        // Check session first (for frontend language switching)
+        $locale = $request->session()->get('locale');
+        
+        // Then check cookie
+        $locale = $locale ?? $request->cookie('locale');
+        
+        // Then check user preference (only if no session/cookie locale)
+        if (!$locale && $request->user() && in_array($request->user()->preferred_locale, $supported, true)) {
+            $locale = $request->user()->preferred_locale;
+        }
+
+        // Finally check Accept-Language header
+        if (!$locale) {
+            $locale = $request->getPreferredLanguage($supported) ?? $fallback;
+        }
+
+        \Log::info('Frontend locale setting', [
+            'user_locale' => $request->user()?->preferred_locale,
+            'session_locale' => $request->session()->get('locale'),
+            'cookie_locale' => $request->cookie('locale'),
+            'final_locale' => $locale,
+            'app_locale_before' => app()->getLocale(),
+        ]);
+
+        app()->setLocale($locale);
+        
+        \Log::info('App locale set', ['app_locale_after' => app()->getLocale()]);
+    }
+
+    /**
      * Display the frontend homepage
      */
-    public function index()
+    public function index(Request $request)
     {
+        $this->setFrontendLocale($request);
         // Get active sliders for the homepage
         $sliders = Slider::where('is_active', true)
                         ->orderBy('order')
@@ -53,8 +94,9 @@ class FrontendController extends Controller
     /**
      * Display a specific page
      */
-    public function page($slug)
+    public function page(Request $request, $slug)
     {
+        $this->setFrontendLocale($request);
         $page = Page::where('slug', $slug)
                    ->where('status', 'published')
                    ->firstOrFail();
@@ -65,8 +107,9 @@ class FrontendController extends Controller
     /**
      * Display about page
      */
-    public function about()
+    public function about(Request $request)
     {
+        $this->setFrontendLocale($request);
         // Get active sliders for the about page banner
         $sliders = Slider::where('is_active', true)
                         ->orderBy('order')
@@ -78,16 +121,18 @@ class FrontendController extends Controller
     /**
      * Display services page
      */
-    public function services()
+    public function services(Request $request)
     {
+        $this->setFrontendLocale($request);
         return view('frontend.services');
     }
     
     /**
      * Display contact page
      */
-    public function contact()
+    public function contact(Request $request)
     {
+        $this->setFrontendLocale($request);
         return view('frontend.contact');
     }
     
@@ -96,6 +141,7 @@ class FrontendController extends Controller
      */
     public function blog(Request $request)
     {
+        $this->setFrontendLocale($request);
         $query = BlogPost::with(['category', 'author', 'tags'])->published();
 
         // Search functionality
@@ -127,8 +173,9 @@ class FrontendController extends Controller
     /**
      * Display blog details page
      */
-    public function blogDetails($slug)
+    public function blogDetails(Request $request, $slug)
     {
+        $this->setFrontendLocale($request);
         $post = BlogPost::with(['category', 'author', 'tags', 'comments'])
                        ->where('slug', $slug)
                        ->published()
@@ -162,6 +209,7 @@ class FrontendController extends Controller
      */
     public function submitComment(Request $request)
     {
+        $this->setFrontendLocale($request);
         $request->validate([
             'blog_post_id' => 'required|exists:blog_posts,id',
             'name' => 'required|string|max:255',
@@ -194,8 +242,9 @@ class FrontendController extends Controller
     /**
      * Display service details page
      */
-    public function serviceDetails($slug)
+    public function serviceDetails(Request $request, $slug)
     {
+        $this->setFrontendLocale($request);
         return view('frontend.service-details', compact('slug'));
     }
     
@@ -204,6 +253,7 @@ class FrontendController extends Controller
      */
     public function tenders(Request $request)
     {
+        $this->setFrontendLocale($request);
         // Start with published tenders only
         $query = Tender::published();
 
@@ -238,8 +288,9 @@ class FrontendController extends Controller
     /**
      * Display individual tender details
      */
-    public function tenderShow(Tender $tender)
+    public function tenderShow(Request $request, Tender $tender)
     {
+        $this->setFrontendLocale($request);
         // Ensure tender is published
         if (!$tender->is_published) {
             abort(404);
@@ -254,8 +305,9 @@ class FrontendController extends Controller
     /**
      * Download tender PDF
      */
-    public function downloadTenderPdf($id)
+    public function downloadTenderPdf(Request $request, $id)
     {
+        $this->setFrontendLocale($request);
         $tender = Tender::published()->findOrFail($id);
         
         if (!$tender->pdf_path || !Storage::disk('public')->exists($tender->pdf_path)) {
@@ -271,8 +323,9 @@ class FrontendController extends Controller
     /**
      * Download tender PDF 2
      */
-    public function downloadTenderPdf2($id)
+    public function downloadTenderPdf2(Request $request, $id)
     {
+        $this->setFrontendLocale($request);
         $tender = Tender::published()->findOrFail($id);
         
         if (!$tender->pdf_path_2 || !Storage::disk('public')->exists($tender->pdf_path_2)) {
@@ -283,5 +336,73 @@ class FrontendController extends Controller
         $tender->incrementViewCount();
         
         return response()->download(storage_path('app/public/' . $tender->pdf_path_2), $tender->tender_number . '_2.pdf');
+    }
+
+    /**
+     * Shrimp Sites Map page
+     */
+    public function shrimpSitesMap(Request $request)
+    {
+        $this->setFrontendLocale($request);
+        return view('frontend.shrimp-map');
+    }
+
+    /**
+     * Public JSON for shrimp sites (active only)
+     */
+    public function shrimpSitesJson(Request $request)
+    {
+        $this->setFrontendLocale($request);
+        $sites = ShrimpSite::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id','name','district','tehsil','area_acres','status','lat','lng','images','marker_icon','description','slug'])
+            ->map(function ($site) {
+                // Ensure absolute URLs for images
+                $imgs = collect($site->images ?? [])->map(function($u){
+                    // If already absolute (http/https/data), keep as-is
+                    if (preg_match('/^(?:https?:)?\/\//i', $u) || str_starts_with($u, 'data:')) {
+                        return $u;
+                    }
+                    // If stored as /storage/.. path, proxy via media route to avoid symlink issues
+                    $path = ltrim($u, '/');
+                    if (str_starts_with($path, 'storage/')) {
+                        $path = substr($path, strlen('storage/'));
+                    }
+                    return route('media.public', ['path' => $path]);
+                })->values()->all();
+                $site->images = $imgs;
+
+                // Normalize marker_icon similar to images
+                if (!empty($site->marker_icon)) {
+                    $u = $site->marker_icon;
+                    if (!(preg_match('/^(?:https?:)?\/\//i', $u) || str_starts_with($u, 'data:'))) {
+                        $path = ltrim($u, '/');
+                        if (str_starts_with($path, 'storage/')) {
+                            $path = substr($path, strlen('storage/'));
+                        }
+                        $site->marker_icon = route('media.public', ['path' => $path]);
+                    }
+                }
+                return $site;
+            });
+        return response()->json($sites);
+    }
+
+    /**
+     * Stream files from the public storage disk (restricted to safe subpaths).
+     */
+    public function mediaPublic(Request $request, string $path)
+    {
+        // Normalize path
+        $path = ltrim($path, '/');
+        // Restrict to known folder(s)
+        if (! (str_starts_with($path, 'shrimp-sites/'))) {
+            abort(403);
+        }
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+        return Storage::disk('public')->response($path);
     }
 }

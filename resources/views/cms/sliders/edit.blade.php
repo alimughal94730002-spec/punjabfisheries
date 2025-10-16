@@ -132,11 +132,11 @@
                         </label>
 
                         <!-- Current Image -->
-                        @if($slider->image_path)
+                        @if($slider->getFirstMedia('slider_image'))
                             <div class="sm:col-span-2">
                                 <span class="text-sm font-medium text-slate-700 dark:text-navy-100">Current Image</span>
                                 <div class="mt-1.5">
-                                    <img src="{{ $slider->image_url }}" alt="Current slider image" class="h-32 w-auto rounded-lg object-cover">
+                                    <img src="{{ $slider->slider_image_url }}" alt="Current slider image" class="h-32 w-auto rounded-lg object-cover">
                                 </div>
                             </div>
                         @endif

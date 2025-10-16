@@ -13,7 +13,8 @@ class AuthController extends Controller
 {
     public function loginView()
     {
-        return view('login');
+        // Use the admin login view component/layout
+        return view('admin.login');
     }
 
     public function login(Request $request)
@@ -41,7 +42,7 @@ class AuthController extends Controller
     }
 
     public function registerView(){
-        return view('register');
+        return view('admin.register');
     }
 
     public function register(Request $request){

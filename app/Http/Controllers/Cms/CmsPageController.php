@@ -383,10 +383,62 @@ class CmsPageController extends Controller
                     $media = $gallery->addMedia($file)
                         ->toMediaCollection($collectionName);
                     
+                    // Check if original file exists, if not use medium conversion
+                    $url = $media->getUrl();
+                    $thumbUrl = $media->getUrl('thumb');
+                    
+                    // If original file doesn't exist, try to use available conversions
+                    if (!Storage::disk($media->disk)->exists($media->getPath())) {
+                        // Try different conversions in order of preference
+                        // Check if this is a BlogPost media or Gallery media
+                        $fallbackConversions = $media->model_type === 'App\Models\BlogPost' 
+                            ? ['featured_web', 'banner_web', 'featured_thumb', 'banner_thumb', 'thumb']
+                            : ['large', 'medium', 'small', 'thumb'];
+                        $url = null;
+                        
+                        foreach ($fallbackConversions as $conversion) {
+                            try {
+                                $conversionUrl = $media->getUrl($conversion);
+                                // Check if the conversion file exists by constructing the path manually
+                                $conversionPath = $media->id . '/conversions/' . pathinfo($media->file_name, PATHINFO_FILENAME) . '-' . $conversion . '.jpg';
+                                if (Storage::disk($media->disk)->exists($conversionPath)) {
+                                    $url = $conversionUrl;
+                                    break;
+                                }
+                            } catch (\Exception $e) {
+                                // Continue to next conversion
+                                continue;
+                            }
+                        }
+                        
+                        if (!$url) {
+                            // If no conversions work, use the original URL anyway
+                            $url = $media->getUrl();
+                            Log::error('No working conversions found for uploaded media', [
+                                'media_id' => $media->id,
+                                'file_name' => $media->file_name
+                            ]);
+                        } else {
+                            Log::warning('Original file missing after upload, using conversion', [
+                                'media_id' => $media->id,
+                                'file_name' => $media->file_name,
+                                'fallback_url' => $url
+                            ]);
+                        }
+                    }
+                    
+                    // Ensure absolute URLs for better compatibility
+                    if (!preg_match('/^https?:\/\//i', $url)) {
+                        $url = url($url);
+                    }
+                    if (!preg_match('/^https?:\/\//i', $thumbUrl)) {
+                        $thumbUrl = url($thumbUrl);
+                    }
+                    
                     $uploadedImages[] = [
                         'id' => $media->id,
-                        'url' => $media->getUrl(),
-                        'thumb' => $media->getUrl('thumb'),
+                        'url' => $url,
+                        'thumb' => $thumbUrl,
                         'name' => $media->name,
                         'gallery_title' => $gallery->title,
                         'size' => $media->size,
@@ -431,10 +483,64 @@ class CmsPageController extends Controller
         $images = collect();
         foreach ($galleries as $gallery) {
             foreach ($gallery->media as $media) {
+                // Check if original file exists, if not use medium conversion
+                $originalUrl = $media->getUrl();
+                $thumbUrl = $media->getUrl('thumb');
+                
+                // If original file doesn't exist, try to use available conversions
+                if (!Storage::disk($media->disk)->exists($media->getPath())) {
+                    // Try different conversions in order of preference
+                    // Check if this is a BlogPost media or Gallery media
+                    $fallbackConversions = $media->model_type === 'App\Models\BlogPost' 
+                        ? ['featured_web', 'banner_web', 'featured_thumb', 'banner_thumb', 'thumb']
+                        : ['large', 'medium', 'small', 'thumb'];
+                    $originalUrl = null;
+                    
+                    foreach ($fallbackConversions as $conversion) {
+                        try {
+                            $conversionUrl = $media->getUrl($conversion);
+                            // Check if the conversion file exists by constructing the path manually
+                            $conversionPath = $media->id . '/conversions/' . pathinfo($media->file_name, PATHINFO_FILENAME) . '-' . $conversion . '.jpg';
+                            if (Storage::disk($media->disk)->exists($conversionPath)) {
+                                $originalUrl = $conversionUrl;
+                                break;
+                            }
+                        } catch (\Exception $e) {
+                            // Continue to next conversion
+                            continue;
+                        }
+                    }
+                    
+                    if (!$originalUrl) {
+                        // If no conversions work, use the original URL anyway
+                        $originalUrl = $media->getUrl();
+                        Log::error('No working conversions found for media', [
+                            'media_id' => $media->id,
+                            'file_name' => $media->file_name,
+                            'original_path' => $media->getPath()
+                        ]);
+                    } else {
+                        Log::warning('Original file missing, using conversion', [
+                            'media_id' => $media->id,
+                            'file_name' => $media->file_name,
+                            'original_path' => $media->getPath(),
+                            'fallback_url' => $originalUrl
+                        ]);
+                    }
+                }
+                
+                // Ensure absolute URLs for better compatibility
+                if (!preg_match('/^https?:\/\//i', $originalUrl)) {
+                    $originalUrl = url($originalUrl);
+                }
+                if (!preg_match('/^https?:\/\//i', $thumbUrl)) {
+                    $thumbUrl = url($thumbUrl);
+                }
+                
                 $images->push([
                     'id' => $media->id,
-                    'url' => $media->getUrl(),
-                    'thumb' => $media->getUrl('thumb'),
+                    'url' => $originalUrl,
+                    'thumb' => $thumbUrl,
                     'name' => $media->name,
                     'gallery_title' => $gallery->title,
                     'size' => $media->size,
@@ -479,6 +585,58 @@ class CmsPageController extends Controller
     {
         $media->load('model');
         
+        // Check if original file exists, if not use medium conversion
+        $url = $media->getUrl();
+        $thumbUrl = $media->getUrl('thumb');
+        
+        // If original file doesn't exist, try to use available conversions
+        if (!Storage::disk($media->disk)->exists($media->getPath())) {
+            // Try different conversions in order of preference
+            // Check if this is a BlogPost media or Gallery media
+            $fallbackConversions = $media->model_type === 'App\Models\BlogPost' 
+                ? ['featured_web', 'banner_web', 'featured_thumb', 'banner_thumb', 'thumb']
+                : ['large', 'medium', 'small', 'thumb'];
+            $url = null;
+            
+            foreach ($fallbackConversions as $conversion) {
+                try {
+                    $conversionUrl = $media->getUrl($conversion);
+                    // Check if the conversion file exists by constructing the path manually
+                    $conversionPath = $media->id . '/conversions/' . pathinfo($media->file_name, PATHINFO_FILENAME) . '-' . $conversion . '.jpg';
+                    if (Storage::disk($media->disk)->exists($conversionPath)) {
+                        $url = $conversionUrl;
+                        break;
+                    }
+                } catch (\Exception $e) {
+                    // Continue to next conversion
+                    continue;
+                }
+            }
+            
+            if (!$url) {
+                // If no conversions work, use the original URL anyway
+                $url = $media->getUrl();
+                Log::error('No working conversions found in showMedia', [
+                    'media_id' => $media->id,
+                    'file_name' => $media->file_name
+                ]);
+            } else {
+                Log::warning('Original file missing in showMedia, using conversion', [
+                    'media_id' => $media->id,
+                    'file_name' => $media->file_name,
+                    'fallback_url' => $url
+                ]);
+            }
+        }
+        
+        // Ensure absolute URLs for better compatibility
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            $url = url($url);
+        }
+        if (!preg_match('/^https?:\/\//i', $thumbUrl)) {
+            $thumbUrl = url($thumbUrl);
+        }
+        
         return response()->json([
             'success' => true,
             'media' => [
@@ -488,8 +646,8 @@ class CmsPageController extends Controller
                 'mime_type' => $media->mime_type,
                 'size' => $media->size,
                 'formatted_size' => $this->formatBytes($media->size),
-                'url' => $media->getUrl(),
-                'thumb_url' => $media->getUrl('thumb'),
+                'url' => $url,
+                'thumb_url' => $thumbUrl,
                 'alt_text' => $media->getCustomProperty('alt_text', ''),
                 'width' => $media->getCustomProperty('width'),
                 'height' => $media->getCustomProperty('height'),
@@ -502,6 +660,25 @@ class CmsPageController extends Controller
                 ] : null,
             ]
         ]);
+    }
+
+    public function regenerateConversions()
+    {
+        try {
+            $service = new \App\Services\MediaLibraryService();
+            $count = $service->regenerateAllConversions();
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Regenerated conversions for {$count} media files",
+                'count' => $count
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error regenerating conversions: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function updateMedia(Request $request, \Spatie\MediaLibrary\MediaCollections\Models\Media $media)

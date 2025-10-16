@@ -17,7 +17,7 @@ class AnnouncementController extends Controller
             ->orderBy('published_date', 'desc')
             ->paginate(20);
 
-        return view('admin.announcements.index', compact('announcements'));
+        return view('cms.announcements.index', compact('announcements'));
     }
 
     /**
@@ -25,7 +25,7 @@ class AnnouncementController extends Controller
      */
     public function create()
     {
-        return view('admin.announcements.create');
+        return view('cms.announcements.create');
     }
 
     /**
@@ -75,7 +75,7 @@ class AnnouncementController extends Controller
      */
     public function show(Announcement $announcement)
     {
-        return view('admin.announcements.show', compact('announcement'));
+        return view('cms.announcements.show', compact('announcement'));
     }
 
     /**
@@ -83,7 +83,7 @@ class AnnouncementController extends Controller
      */
     public function edit(Announcement $announcement)
     {
-        return view('admin.announcements.edit', compact('announcement'));
+        return view('cms.announcements.edit', compact('announcement'));
     }
 
     /**

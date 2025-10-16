@@ -43,7 +43,7 @@
                                 <tr>
                                     <td class="whitespace-nowrap">
                                         <div class="avatar size-16">
-                                            <img class="rounded-lg object-cover" src="{{ $slider->image_url }}" alt="{{ $slider->title }}">
+                                            <img class="rounded-lg object-cover" src="{{ $slider->slider_image_url }}" alt="{{ $slider->title }}">
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap">

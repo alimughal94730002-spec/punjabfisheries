@@ -157,9 +157,12 @@
                         <h3 class="text-lg font-medium text-slate-900 dark:text-slate-100">Media Files</h3>
                         <div class="flex items-center space-x-2">
                             <button type="button" 
-                                    onclick="testModal()"
-                                    class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                Test Modal
+                                    onclick="regenerateConversions()"
+                                    class="inline-flex items-center rounded-md border border-transparent bg-green-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Regenerate Thumbnails
                             </button>
                             <button type="button" 
                                     id="bulkDeleteBtn" 
@@ -200,6 +203,8 @@
                                                 <img src="{{ $media->getUrl('thumb') }}" 
                                                      class="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer" 
                                                      alt="{{ $media->name }}"
+                                                     onerror="console.log('Thumbnail failed to load:', this.src); this.src='{{ $media->getUrl() }}'; this.onerror=null;"
+                                                     onload="console.log('Thumbnail loaded successfully:', this.src)"
                                                      onclick="viewMedia({{ $media->id }})">
                                             @elseif(str_starts_with($media->mime_type, 'video/'))
                                                 <div class="flex h-32 w-full items-center justify-center bg-slate-100 dark:bg-slate-700 cursor-pointer" onclick="viewMedia({{ $media->id }})">
@@ -453,17 +458,39 @@ function closeUploadModal() {
         document.getElementById('editMediaModal').classList.add('hidden');
     }
 
-    // Test modal function
-    function testModal() {
-        console.log('Testing modal...');
-        document.getElementById('mediaDetailsContent').innerHTML = `
-            <div style="text-align: center; padding: 20px;">
-                <h3 style="color: #333; margin-bottom: 15px;">Test Modal</h3>
-                <p style="color: #666; margin-bottom: 20px;">This is a test modal to check if modals work properly.</p>
-                <button onclick="closeMediaDetailsModal()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Test Modal</button>
-            </div>
-        `;
-        document.getElementById('mediaDetailsModal').style.display = 'block';
+    // Regenerate conversions function
+    function regenerateConversions() {
+        if (confirm('Are you sure you want to regenerate all thumbnails? This may take a few minutes.')) {
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Regenerating...';
+            button.disabled = true;
+            
+            fetch('/cms/media-library/regenerate-conversions', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Successfully regenerated ' + data.count + ' thumbnails!');
+                    location.reload();
+                } else {
+                    alert('Error regenerating thumbnails: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error regenerating thumbnails');
+            })
+            .finally(() => {
+                button.textContent = originalText;
+                button.disabled = false;
+            });
+        }
     }
 
     // Media management functions

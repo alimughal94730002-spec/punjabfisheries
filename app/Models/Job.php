@@ -9,6 +9,11 @@ class Job extends Model
 {
     use HasFactory;
 
+    /**
+     * Explicitly set the table to avoid collision with Laravel's queue jobs table.
+     */
+    protected $table = 'job_listings';
+
     protected $fillable = [
         'title',
         'description',

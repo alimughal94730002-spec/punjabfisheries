@@ -1,45 +1,51 @@
 {{-- Header --}}
 <header class="z-10 py-3 lg:py-4 xxl:py-6 w-full bg-neutral-0 px-3 sticky top-0">
-  <div class="max-w-[1712px] mx-auto flex justify-between items-center">
-    <a href="/" class="w-auto h-auto" aria-label="site logo">
+  <div class="max-w-[1712px] mx-auto flex justify-between items-center {{ app()->getLocale() === 'ur' ? 'flex-row-reverse' : '' }}">
+    {{-- Logo - Right side for Urdu, Left side for English --}}
+    <a href="/" class="w-auto h-auto {{ app()->getLocale() === 'ur' ? 'order-3' : 'order-1' }}" aria-label="site logo">
       <img src="{{ asset('assets/images/flogo.svg') }}" alt="" class="logo-size" />
     </a>  
-    <ul class="menu">
+    {{-- Navigation Menu - Center --}}
+    <ul class="menu {{ app()->getLocale() === 'ur' ? 'order-2' : 'order-2' }}">
       <a class="flex mb-4 lg:hidden h-auto" href="/">
         <img src="{{ asset('assets/images/flogo.svg') }}" alt="" class="logo-size" />
       </a>
       <li>
-        <a class="menu-link" href="/">Home</a>
+        <a class="menu-link" href="/">{{ __('app.home') }}</a>
       </li>
       
       <li>
-        <a class="menu-link" href="{{ route('frontend.about') }}">About</a>
+        <a class="menu-link" href="{{ route('frontend.about') }}">{{ __('app.about') }}</a>
       </li>
       <li>
-        <a class="menu-link" href="#">Services</a>
+        <a class="menu-link" href="#">{{ __('app.services') }}</a>
       </li>
       <li>
-        <a class="menu-link" href="{{ route('frontend.announcements') }}">Announcements</a>
+        <a class="menu-link" href="{{ route('frontend.announcements') }}">{{ __('app.announcements') }}</a>
       </li>
       <li>
-        <a class="menu-link" href="{{ route('frontend.jobs') }}">Jobs</a>
+        <a class="menu-link" href="{{ route('frontend.jobs') }}">{{ __('app.jobs') }}</a>
       </li>
      
       <li class="dropdown-item">
         <button class="dropdown-btn" aria-label="Dropdown button">
-          Pages <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+          {{ __('app.pages') }} <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
         </button>
         <ul class="dropdown-menu">
-          <li><a class="menu-link" href="{{ route('frontend.blog') }}">Blogs</a></li>
+          <li><a class="menu-link" href="{{ route('frontend.blog') }}">{{ __('app.blog') }}</a></li>
           <li><a class="menu-link" href="#">Blog Details</a></li>
           <li><a class="menu-link" href="#">Service Details</a></li>
         </ul>
       </li>
       <li>
-        <a class="menu-link" href="#">Contact</a>
+        <a class="menu-link" href="#">{{ __('app.contact') }}</a>
       </li>
     </ul>
-    <div class="flex items-center gap-2 sm:gap-3 lg:gap-4">
+    {{-- Controls - Left side for Urdu, Right side for English --}}
+    <div class="flex items-center gap-2 sm:gap-3 lg:gap-4 {{ app()->getLocale() === 'ur' ? 'order-1' : 'order-3' }}">
+      <!-- Language Switcher -->
+      <x-frontend.locale-switcher />
+      
       <button aria-label="Search Button" class="topbar-btn search-btn">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5 xl:size-6" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
       </button>
@@ -74,11 +80,11 @@
     </button>
   </div>
   <ul class="space-y-2 overflow-y-auto h-full pb-16">
-    <li><a href="/" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">Home</a></li>
-    <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">About</a></li>
-    <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">Services</a></li>
-    <li><a href="{{ route('frontend.announcements') }}" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">Announcements</a></li>
-    <li><a href="{{ route('frontend.jobs') }}" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">Careers</a></li>
+    <li><a href="/" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">{{ __('app.home') }}</a></li>
+    <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">{{ __('app.about') }}</a></li>
+    <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">{{ __('app.services') }}</a></li>
+    <li><a href="{{ route('frontend.announcements') }}" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">{{ __('app.announcements') }}</a></li>
+    <li><a href="{{ route('frontend.jobs') }}" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">{{ __('app.jobs') }}</a></li>
     <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">Shop</a></li>
     <li class="submenu-item">
       <button aria-label="submenu button" class="submenu-btn border border-neutral-40 flex w-full items-center justify-between rounded-md px-3 py-2.5 font-medium">
@@ -86,12 +92,12 @@
       </button>
       <div class="submenu-content">
         <ul class="space-y-2 py-2 pl-3">
-          <li><a class="border border-neutral-40 flex rounded-md px-3 py-2" href="{{ route('frontend.blog') }}">Blogs</a></li>
+          <li><a class="border border-neutral-40 flex rounded-md px-3 py-2" href="{{ route('frontend.blog') }}">{{ __('app.blog') }}</a></li>
           <li><a class="border border-neutral-40 flex rounded-md px-3 py-2" href="#">Blog Details</a></li>
           <li><a class="border border-neutral-40 flex rounded-md px-3 py-2" href="#">Service Details</a></li>
         </ul>
       </div>
     </li>
-    <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">Contact</a></li>
+    <li><a href="#" class="border border-neutral-40 flex rounded-md px-3 py-2.5 font-medium">{{ __('app.contact') }}</a></li>
   </ul>
 </div>

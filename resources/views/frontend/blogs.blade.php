@@ -1,38 +1,16 @@
-{{-- resources/views/frontend/blogs.blade.php --}}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Department of Fisheries, Government of the Punjab — latest news, updates and insights about fisheries development, aquaculture and marine conservation." />
-  <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}" type="image/x-icon" />
-  <link rel="preconnect" href="https://fonts.googleapis.com/" />
-  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
-  <link rel="stylesheet" href="{{ asset('assets/css/swiper.min.css') }}" />
-  <link rel="stylesheet" href="{{ asset('assets/css/glightbox.css') }}" />
-  <title>Blogs — Department of Fisheries, Government of the Punjab</title>
-  <script defer src="{{ asset('assets/js/app.min.js') }}"></script>
-  <link href="{{ asset('assets/css/styles.css') }}" rel="stylesheet">
-</head>
-
-<body>
-  {{-- Loader --}}
-  <div class="screen_loader fixed inset-0 z-[101] grid place-content-center bg-neutral-0">
-    <div class="w-10 h-10 border-4 border-t-primary-400 border-neutral-40 rounded-full animate-spin"></div>
-  </div>
-
-  {{-- Header --}}
-  @include('frontend.layouts.header')
+@extends('frontend.layouts.app')
+@section('title', 'Blogs — Department of Fisheries, Government of the Punjab')
+@section('content')
 
 
   {{-- Banner --}}
   <section class="px-3">
     <div class="max-w-[1800px] mx-auto bg-primary-50 rounded-xl xl:rounded-2xl py-14 xl:py-28 flex justify-center text-center">
       <div class="relative z-[1] reveal_anim">
-        <h2 class="mb-5">Blogs</h2>
+        <h2 class="mb-5">{{ __('app.blog') }}</h2>
         <div class="flex justify-center items-center gap-2">
-          <a href="{{ url('/') }}">Home</a> &gt;
-          <span class="text-primary-300">Blogs</span>
+          <a href="{{ url('/') }}">{{ __('app.home') }}</a> &gt;
+          <span class="text-primary-300">{{ __('app.blog') }}</span>
         </div>
       </div>
     </div>
@@ -158,7 +136,4 @@
     </div>
   </section>
 
-  {{-- Footer --}}
-  @include('frontend.layouts.footer')
-</body>
-</html>
+@endsection

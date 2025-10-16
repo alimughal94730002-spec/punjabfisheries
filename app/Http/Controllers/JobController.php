@@ -6,6 +6,7 @@ use App\Models\Job;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 
 class JobController extends Controller
 {
@@ -43,12 +44,11 @@ class JobController extends Controller
             'requirements' => 'nullable|string',
             'benefits' => 'nullable|string',
             'application_deadline' => 'nullable|date|after:today',
-            'is_active' => 'nullable|boolean',
             'status' => 'required|string|in:open,closed,filled',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240' // 10MB max
         ]);
 
-        // Handle checkbox for is_active
+        // Handle checkbox for is_active (checkboxes are not included in validation)
         $validated['is_active'] = $request->has('is_active');
 
         // Handle file upload
@@ -101,12 +101,11 @@ class JobController extends Controller
             'requirements' => 'nullable|string',
             'benefits' => 'nullable|string',
             'application_deadline' => 'nullable|date|after:today',
-            'is_active' => 'nullable|boolean',
             'status' => 'required|string|in:open,closed,filled',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240' // 10MB max
         ]);
 
-        // Handle checkbox for is_active
+        // Handle checkbox for is_active (checkboxes are not included in validation)
         $validated['is_active'] = $request->has('is_active');
 
         // Handle file upload
@@ -148,19 +147,51 @@ class JobController extends Controller
     }
 
     /**
+     * Set locale for frontend requests
+     */
+    private function setFrontendLocale(Request $request)
+    {
+        $supported = config('localization.supported', ['en', 'ur']);
+        $fallback = config('localization.fallback', 'en');
+
+        $locale = null;
+
+        // Check session first (for frontend language switching)
+        $locale = $request->session()->get('locale');
+        
+        // Then check cookie
+        $locale = $locale ?? $request->cookie('locale');
+        
+        // Then check user preference (only if no session/cookie locale)
+        if (!$locale && $request->user() && in_array($request->user()->preferred_locale, $supported, true)) {
+            $locale = $request->user()->preferred_locale;
+        }
+
+        // Finally check Accept-Language header
+        if (!$locale) {
+            $locale = $request->getPreferredLanguage($supported) ?? $fallback;
+        }
+
+        app()->setLocale($locale);
+    }
+
+    /**
      * Display jobs for frontend
      */
-    public function frontendIndex(): View
+    public function frontendIndex(Request $request): View
     {
-        $jobs = Job::active()->open()->latest()->paginate(12);
+        $this->setFrontendLocale($request);
+        // Show all jobs (active and inactive, open and closed) but prioritize active and open ones
+        $jobs = Job::latest()->paginate(12);
         return view('frontend.jobs.index', compact('jobs'));
     }
 
     /**
      * Display single job for frontend
      */
-    public function frontendShow(Job $job): View
+    public function frontendShow(Request $request, Job $job): View
     {
+        $this->setFrontendLocale($request);
         return view('frontend.jobs.show', compact('job'));
     }
 
