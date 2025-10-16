@@ -67,7 +67,7 @@ It includes:
 
 ```bash
 # Clone repository
-git clone https://github.com/skdevelopers/punjabfisheries.gov.pk.git
+git clone https://github.com/alimughal94730002-spec/punjabfisheries.git
 cd punjabfisheries.gov.pk
 
 # Install PHP dependencies
